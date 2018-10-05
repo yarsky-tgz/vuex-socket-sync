@@ -1,0 +1,20 @@
+{
+  "name": "vuex-socket-sync",
+  "version": "1.0.0",
+  "description": "Vuex plugin which adds ability to connect store actions with socket events and socket events with store actions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yarsky-tgz/vuex-socket-sync.git"
+  },
+  "author": "Yaroslav Dobzhanskij <merlyn.tgz@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yarsky-tgz/vuex-socket-sync/issues"
+  },
+  "homepage": "https://github.com/yarsky-tgz/vuex-socket-sync#readme",
+  "keywords": ["vuex", "vue", "socket.io", "websocket", "ws", "connect", "synchronize"]
+}
