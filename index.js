@@ -5,7 +5,7 @@ const prefix = (target, name) => target.indexOf('/') !== -1 ? target : name + '/
 const convert = (target, index, name) => prefix(target === '=' ? index : target, name);
 export default (io, modules, optionsOverride = {}) => store => {
   const spaces = {};
-  const space = name => spaces.name || (spaces.name = io(options.socketPrefix + name));
+  const space = name => spaces[name] || (spaces[name] = io(options.socketPrefix + name));
   const on = ([ nsp, event ], handler) => space(nsp).on(event, handler);
   const actionsMap = {};
   const options = Object.assign({}, defaultOptions, optionsOverride);
