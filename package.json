@@ -4,7 +4,7 @@
   "description": "Vuex plugin which adds ability to connect store actions with socket events and socket events with store actions",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage"
+    "test": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
