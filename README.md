@@ -18,7 +18,7 @@ Into each module describing object u can add optional property `socket`, which s
 
 `events` should be object representing event-to-action mapping and `actions` should represent action-to-event mapping
 
-Simplest example: 
+Simplest example of `socket` mapping: 
 
 ```javascript
 {
@@ -104,9 +104,14 @@ export default new Vuex.Store({
 
 So, what we have here?
 
-On socket event from namespace `/folders` with name `paths` shall be dispatched actions `folders/fillQueryPaths` and `settings/saveActualPaths`.
+
+On socket event from namespace `/folders` with name `paths` shall be dispatched two actions: `folders/fillQueryPaths` and `settings/saveActualPaths`.
+
 On dispatch action `folders/openUserFolder` shall be emitted event `browse` of namespace `/folders`.
+
 On dispatch action `folders/execute` shall be emitted event `execute` of namespace `/interpreter`. 
-On dispatch action `folders/search` shall be emitted event `search` of namespace `/folders`
+
+On dispatch action `folders/search` shall be emitted event `search` of namespace `/folders`.
+
 
 As you see you just give socket.io client builder to plugin. It takes care about everything else by it's own 
