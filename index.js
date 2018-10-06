@@ -1,13 +1,14 @@
 const defaultOptions = {
-  root: false,
-  usePrefixForSocket: true
+  socketPrefix: '/'
 };
 const prefix = (target, name) => target.indexOf('/') !== -1 ? target : name + '/' + target;
 const convert = (target, index, name) => prefix(target === '=' ? index : target, name);
-export default (socket, modules, optionsOverride = {}) => store => {
-  const fullActionsMap = {};
+export default (io, modules, optionsOverride = {}) => store => {
+  const spaces = {};
+  const space = name => spaces.name || (spaces.name = io(options.socketPrefix + name));
+  const on = ([ nsp, event ], handler) => space(nsp).on(event, handler);
+  const actionsMap = {};
   const options = Object.assign({}, defaultOptions, optionsOverride);
-  //@TODO: implement options usage
   Object.keys(modules).forEach(name => {
     const module = modules[ name ];
     if (!module.socket) return;
@@ -17,12 +18,14 @@ export default (socket, modules, optionsOverride = {}) => store => {
       let action = events[ event ];
       if (!Array.isArray(action)) action = [ action ];
       action = action.map(action => convert(action, event, name));
-      socket.on(prefix(event, name), function (payload) {
-        action.map(action => store.dispatch(action, payload));
-      });
+      on(prefix(event, name).split('/'), payload => action.map(action => store.dispatch(action, payload)));
     });
-    Object.keys(actions).forEach(action => fullActionsMap[ prefix(action, name) ] = convert(actions[ action ], action, name));
+    Object.keys(actions).forEach(action => {
+      const [ nsp, event ] = convert(actions[ action ], action, name).split('/');
+      actionsMap[ prefix(action, name) ] = { socket: space(nsp), event }
+    });
   });
-  store.subscribeAction(action => fullActionsMap[ action.type ] && socket.emit(fullActionsMap[ action.type ], action.payload));
+  store.subscribeAction(
+    ({ type, payload }) => actionsMap[ type ] && actionsMap[ type ].socket.emit(actionsMap[ type ].event, payload));
 }
 

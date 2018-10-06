@@ -12,13 +12,53 @@ npm i vuex-socket-sync
 
 ## Usage
 
-Currently it wotks only with modules. 
+It works only with vuex modules. 
 
 Into each module describing object u can add optional property `socket`, which should consists from two sub properties: `events` and `actions`. 
 
 `events` should be object representing event-to-action mapping and `actions` should represent action-to-event mapping
 
-## Example
+Simplest example: 
+
+```javascript
+{
+  events: {
+    answer: 'setAnswer'
+  },
+  actions: {
+    ask: 'question'
+  }
+}
+```
+
+No problem if you want few modules actions to be dispatched by one event:
+
+```javascript
+events: {
+  answer: [
+    'setAnswer',
+    'logger/logAnswer'
+  ] 
+}
+```
+
+In case we haven't slash `'/'` in `event` or `action` mapping value it shall be namespaced or prefixed with current `module` name. 
+
+Be patient: that is actual only for **right part** of mapping. **left part** always belongs to current module and **same named** namespace. So you can write: 
+
+```
+  event: 'otherModule/action'
+```
+
+but you cannot 
+
+```
+  'otherModule/event': 'myAction'
+```
+
+In case we have `'='` as mapping value it means, that   we shall use same name for `event` or `action`
+
+## Full Store Example
 
 ```javascript
 import socket from 'vuex-socket-sync';
@@ -37,11 +77,14 @@ const modules = {
     mutations,
     socket: {
       events: {
-        folders: 'fillFolders',
-        paths: 'fillQueryPaths',
+        paths: [
+          'fillQueryPaths',
+          'settings/saveActualPaths'
+        ]
       },
       actions: {
         openUserFolder: 'browse',
+        execute: 'interpreter/execute',
         search: '='
       }
     }
@@ -54,14 +97,16 @@ export default new Vuex.Store({
   state,
   modules,
   plugins: [
-    socket(io('/users'), modules)
+    socket(io, modules)
   ]
 });
 ```
 
 So, what we have here?
 
-On socket event with name `folders/paths` shall be dispatched action `folders/fillQueryPaths`.
-On dispatch action `folders/openUserFolder` shall be emitted event `folders/browse`.
+On socket event from namespace `/folders` with name `paths` shall be dispatched actions `folders/fillQueryPaths` and `settings/saveActualPaths`.
+On dispatch action `folders/openUserFolder` shall be emitted event `browse` of namespace `/folders`.
+On dispatch action `folders/execute` shall be emitted event `execute` of namespace `/interpreter`. 
+On dispatch action `folders/search` shall be emitted event `search` of namespace `/folders`
 
-In case we have `'='` as mapping value it means, that   we shall use same name for `event` or `action`
+As you see you just give socket.io client builder to plugin. It takes care about everything else by it's own 
