@@ -30,7 +30,7 @@ export default (io, modules, optionsOverride = {}) => store => {
     const { socket, event } = actionsMap[ type ];
     const ack = (payload && (typeof payload._ack === "function") && payload._ack) || undefined;
     if (ack) {
-      const payloadCopy = { ...payload };
+      const payloadCopy = Object.assign({}, payload);
       delete payloadCopy._ack;
       socket.emit(event, payloadCopy, ack);
     } else socket.emit(event, payload);
