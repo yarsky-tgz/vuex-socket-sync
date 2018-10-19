@@ -1,6 +1,6 @@
 {
   "name": "vuex-socket-sync",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Vuex plugin which adds ability to connect store actions with socket events and socket events with store actions",
   "main": "index.js",
   "scripts": {

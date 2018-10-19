@@ -125,6 +125,35 @@ describe('testing vuex socket sync plugin', () => {
     });
     expect(emit).toBeCalledWith('ask', question);
   });
+  test('it sends ack', () => {
+    const question = 'how much is a fish?';
+    const { io, store } = initHelpers();
+    const modules = {
+      test: {
+        socket: {
+          events: {},
+          actions: {
+            ask: '='
+          }
+        }
+      }
+    };
+    subject(io, modules)(store);
+    const { emit } = io.mock.results[0].value;
+    const _ack = function () {};
+    store.subscribeAction.mock.calls[0][0]({
+      type: 'test/ask',
+      payload: {
+        question,
+        _ack
+      }
+    });
+    expect(emit).toBeCalledWith('ask', { question }, _ack);
+    store.subscribeAction.mock.calls[0][0]({
+      type: 'test/other',
+      payload: {}
+    });
+  });
   test('it ignores module without socket', () => {
     const { io, store } = initHelpers();
     const modules = {

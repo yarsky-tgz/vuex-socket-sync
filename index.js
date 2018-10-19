@@ -25,7 +25,15 @@ export default (io, modules, optionsOverride = {}) => store => {
       actionsMap[ prefix(action, name) ] = { socket: space(nsp), event }
     });
   });
-  store.subscribeAction(
-    ({ type, payload }) => actionsMap[ type ] && actionsMap[ type ].socket.emit(actionsMap[ type ].event, payload));
+  store.subscribeAction(({ type, payload }) => {
+    if (!actionsMap[ type ]) return;
+    const { socket, event } = actionsMap[ type ];
+    const ack = (payload && (typeof payload._ack === "function") && payload._ack) || undefined;
+    if (ack) {
+      const payloadCopy = { ...payload };
+      delete payloadCopy._ack;
+      socket.emit(event, payloadCopy, ack);
+    } else socket.emit(event, payload);
+  });
 }
 
