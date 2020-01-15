@@ -1,8 +1,8 @@
 # vuex-socket-sync [![Coverage Status](https://coveralls.io/repos/github/yarsky-tgz/vuex-socket-sync/badge.svg?branch=master)](https://coveralls.io/github/yarsky-tgz/vuex-socket-sync?branch=master) [![Build Status](https://travis-ci.org/yarsky-tgz/vuex-socket-sync.svg?branch=master)](https://travis-ci.org/yarsky-tgz/vuex-socket-sync)
 
 Vuex plugin, which makes simple, but very powerful job: 
- * on each `action` dispatch it emits socket `event`, specified for that `action`, **with same payload**
- * on each received socket `event` it dispatches one or more `actions`, specified for such event, **with same payload**
+ * on each `action` dispatch it emits socket `event`, defined for that `action`, **with the same payload**
+ * on each received socket `event` it dispatches one or more `actions`, defined for such event, **with the same payload**
  
 ## Installation
  
