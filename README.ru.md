@@ -126,9 +126,7 @@ export default new Vuex.Store({
 
 При диспетчеризации `folders/execute`  будет отправлено событие `execute` пространства имён `/interpreter`.
 
-При диспетчеризации `folders/search` будет отправлено событие `search` пространства имён `/folders`.
-
-As you can see you just give socket.io client builder to plugin. It takes care about everything else by it's own 
+При диспетчеризации `folders/search` будет отправлено событие `search` пространства имён `/folders`. 
 
 Как Вы видите, вы просто передаёте в плагин конструктор socket.io подключения. Дальше он сам обо всём позаботится.
 
