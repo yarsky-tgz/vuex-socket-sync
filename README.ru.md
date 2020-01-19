@@ -5,47 +5,51 @@
  * при каждой диспетчеризации **действия** (`action`) он отправляет в сокет **событие** (`event`), назначенное Вами для этого **действия**, с теми же данными.
  * при каждом полученном через сокет **событии** , он диспетчеризует одно или более **действий**, назначенных Вами для таких **событий**, с теми же данными.
  
+Для организации логики на стороне сервера в модули с теми же названиями вам потребуется использовать мою библиотеку [socket.io-namespace-controller](https://www.npmjs.com/package/socket.io-namespace-controller)
+ 
 ## Установка
  
-```b
-npm i vuex-socket-sync
+```bash
+npm i vuex-socket-sync socket.io-namespace-controller
 ```
 
 ## Использование
- 
-It works only with vuex modules.
- 
-Это работает только с модулями vuex.
 
-Into each vuex module u can add optional property `socket`, which should consist from two sub properties: `events` and `actions`. 
+Теперь вы можете в ваших vuex модулях дополнительно определять свойство `socket` - объект, описывающий какие **действия** диспетчеризировать в ответ на какие **события** и наоборот - какое **событие** отправить при диспетчеризации каких **действий**. 
 
-В каждый модуль можно добавить необязательное свойство `socket`, которое должно состоять из двух суб свойств: событий **events** 
-и действий **actions**.
- 
-`events` should be object representing event-to-action mapping and `actions` should represent action-to-event mapping
+Обьект состоит из двух свойств:
 
-События **events** должны быть отображением объектов, представляющих событие - действие и действия **actions** должны отображать 
-представление действие-событие.
+ * `actions` - объект, описывающий, какие **события** отправлять при диспетчеризации **действий**, имена свойств описывают имена **действий**, а значения - имена **события**.
+ * `events` - объект, описывающий, какие **действия** диспетчеризировать после получения каких **событий**, имена свойств описывают имена **событий**, а значения - имена **действий**. Значение может быть массивом, тогда будет вызвано несколько **действий** 
 
-Simplest example of `socket` mapping: 
-
-Простейший пример отображения сокета **socket**:
+Пример модуля:
 
 ```javascript
 {
-  events: {
-    answer: 'setAnswer'
-  },
+  namespaced: true,
+  getters: {...},
+  mutations: {...}
   actions: {
-    ask: 'question'
+    setAnswer() {...},
+    sendQuestion() {...}
+  },
+  socket: {
+    events: {
+      answer: 'setAnswer'
+    },
+    actions: {
+     sendQuestion: 'ask'
+    }
   }
 }
 ```
 
-No problem if you want a few modules actions to be dispatched by one event:
+В данном примере у нас два **действия** в модуле: `setAnswer()` и `sendQuestion()`. И в свойстве `socket` описаны следующие правила синхронизации действий с событиями и наоборот:
 
+ * при получении **события** `answer` будет диспетчеризировано **действие** `setAnswer` с теми же данными.
+ * при диспетчеризации **действия** `sendQuestion` будет отправлено **событие** `ask` с теми же данными.
 
-Нет проблем, если Вы хотите, чтобы несколько модулей действий были диспетчеризованы одним событием **event**: 
+Нет проблем, если Вы хотите, чтобы несколько **действий** были диспетчеризованы одним **событием**: 
 
 ```javascript
 events: {
@@ -56,13 +60,9 @@ events: {
 }
 ```
 
-In case we haven't slash `'/'` in `event` or `action` mapping value it will be namespaced or prefixed with current `module` name. 
+Be attentive: that is actual only for **right part** of mapping. **left part** always belongs to current module and **same named** namespace. So you can write: 
 
-В случае, когда у нас нет слэш **slash** "/" в событии **event** или действии **action**, отображающих значение, оно будет заменено или написано через дефис с текущим названием модуля **module**.
-
-Be patient: that is actual only for **right part** of mapping. **left part** always belongs to current module and **same named** namespace. So you can write: 
-
-Потерпите: это актуально только для правой части **right part** отображения. Левая часть **left part** всегда принадлежит к текущему модулю и одноимённа **same named** в пространстве имён. Поэтому Вы можете написать:
+Вы можете указывать путь к событию или действию из другого пространства имен (например `logger/logAnswer`), но это работает только для **значений свойств** в `actions`/`events` объектах. **События** или **действия**, являющиеся **именами свойств** всегда принадлежат к текущему модулю или [пространству имён] socket.io. Поэтому Вы можете написать:
 
 ```
   event: 'otherModule/action'
@@ -76,9 +76,12 @@ but you cannot
   'otherModule/event': 'myAction'
 ```
 
+Так же вы можете использовать значение 
+
+
 In case we have `'='` as mapping value it means, that   we shall use the same name for `event` or `action`
 
-В случае, когда мы имеем  =    как отображение значения, это значит, что мы будем использовать то же самое имя для события **event** или действия **action** 
+В случае, когда мы имеем `'='` как значение, это значит, что мы будем использовать то же самое имя для `event`  или `action` 
 
 ## Full Store Example
 
@@ -135,17 +138,17 @@ On socket event from namespace `/folders` with name `paths` shall be dispatched 
 
 On dispatch action `folders/openUserFolder` will be emitted event `browse` of namespace `/folders`.
 
-При диспетчеризации (папки/открытьПользовательПапка) **folders/openUserFolder** будет выделено событие "просмотр" **browse** папок пространства имён **/folders**.
+При диспетчеризации `folders/openUserfolder` будет выделено событие `browse` пространства имён `/folders`.
 
 On dispatch action `folders/execute` will be emitted event `execute` of namespace `/interpreter`. 
 
-При диспетчеризации **оформления папок** (`folders/execute`)  будет отправлено сообщение от переводчика из пространства имён (`/interpreter).
+При диспетчеризации `folders/execute`  будет выделено событие `execute из пространства имён (`/interpreter).
 
 On dispatch action `folders/search` will be emitted event `search` of namespace `/folders`.
 
-При диспетчеризации поиска папок (`folders/search`) будет отправлено событие **поиск** (`search`) папок **`/folders`** в пространстве имён.
+При диспетчеризации действия `folders/search` будет отправлено событие `search` пространства имён `/folders`.
 
 As you can see you just give socket.io client builder to plugin. It takes care about everything else by it's own 
 
-Как Вы видите, вы только даёте клиенту соединиться через сокет. Дальше он сам обо всём позаботится.
+Как Вы видите, вы только даёте cтроителю клиента соединиться через сокет. Дальше он сам обо всём позаботится.
 
