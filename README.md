@@ -1,43 +1,27 @@
 # vuex-socket-sync [![Coverage Status](https://coveralls.io/repos/github/yarsky-tgz/vuex-socket-sync/badge.svg?branch=master)](https://coveralls.io/github/yarsky-tgz/vuex-socket-sync?branch=master) [![Build Status](https://travis-ci.org/yarsky-tgz/vuex-socket-sync.svg?branch=master)](https://travis-ci.org/yarsky-tgz/vuex-socket-sync)
 
-Плагин к [vuex](https://github.com/vuejs/vuex), который выполняет простую, но очень эффективную работу:
-
-Plugin to [vuex](https//github.com/vuexjs/vuex),that does a simple, but very important job: 
-
- * при каждой диспетчеризации **действия** (`action`) он отправляет в сокет **событие** (`event`), назначенное Вами для этого **действия**, с теми же данными.
- * при каждом полученном через сокет **событии** , он диспетчеризует одно или более **действий**, назначенных Вами для таких **событий**, с теми же данными.
+Plugin to [vuex](https//github.com/vuexjs/vuex), that does a simple, but very powerful job: 
  
- * on every  **action** dispatch `action` it emits socket `event`, defined by yourself for this **action**, with the same data.
- * on every received socket **event**, it dispatches one or more **actions**, defined by yourself, for such **events**, with the same data.
- 
-Для организации логики на стороне сервера в модули с теми же названиями вам потребуется использовать мою библиотеку [socket.io-namespace-controller](https://www.npmjs.com/package/socket.io-namespace-controller)
+ * on every **action** dispatch it emits socket **event**, defined by you for this **action**, with the same data.
+ * on every received socket **event**, it dispatches one or more **actions**, defined by you, for such **events**, with the same data.
 
-For organizing of logic on the side of server into the modules with the same names you will need to use my library [socket.io-
+For organizing of logic on the server side into the modules with the same names you will need to use my library [socket.io-
 namespace-controller](https://www.npmjs.com/package/socket.io-namespace-controller)
  
-## Установка
+## Installation
  
 ```bash
 npm i vuex-socket-sync socket.io-namespace-controller
 ```
 
-## Использование
-
-Теперь вы можете в ваших vuex модулях дополнительно определять свойство `socket` - объект, описывающий какие **действия** диспетчеризировать в ответ на какие **события** и наоборот - какое **событие** отправить при диспетчеризации каких **действий**. 
+## Usage
 
 Now you can additionally define in your vuex modules the `socket` property - an object, that defines what **actions** to dispatch in response to what **events** and vice versa - what **event** to emit when dispatching what **actions**.
 
-Обьект состоит из двух свойств:
-
 The object consists of two properties:
-
- * `actions` - объект, описывающий, какие **события** отправлять при диспетчеризации **действий**, имена свойств описывают имена **действий**, а значения - имена **события**.
- * `events` - объект, описывающий, какие **действия** диспетчеризировать после получения каких **событий**, имена свойств описывают имена **событий**, а значения - имена **действий**. Значение может быть массивом, тогда будет вызвано несколько **действий** 
  
  * `actions` - an object, that defines what **events** to emit when dispatching **actions**, the names of properties describe the names of **events**, and values - the names of **actions**.  
  * `events` - an object, that defines what **actions** to dispatch after receiving what **events**, the names of properties describe the names of **actions**, and values - the names of **actions**. Value can be an array, then several **actions** will be called.
-
-Пример модуля:
 
 The module example:
 
@@ -61,12 +45,12 @@ The module example:
 }
 ```
 
-В данном примере у нас два **действия** в модуле: `setAnswer()` и `sendQuestion()`. И в свойстве `socket` описаны следующие правила синхронизации действий с событиями и наоборот:
+In this example we have two **actions** in the module: `setAnswer()` and `sendQuestion()`. And in `socket` property next rules of synchronization of actions with events are defined:
 
- * при получении **события** `answer` будет диспетчеризировано **действие** `setAnswer` с теми же данными.
- * при диспетчеризации **действия** `sendQuestion` будет отправлено **событие** `ask` с теми же данными.
+ * on receiving **event** `answer` **action** `setAnswer` will be dispatched with the same data.
+ * on dispatching **action** `sendQuestion` **event** `ask` will be emited with the same data.
 
-Нет проблем, если Вы хотите, чтобы несколько **действий** были диспетчеризованы одним **событием**: 
+No problems if you want a few **actions** to be dispatched with one **event**:
 
 ```javascript
 events: {
@@ -77,21 +61,22 @@ events: {
 }
 ```
 
-Вы можете указывать путь к событию или действию из другого пространства имен (например `logger/logAnswer`), но это работает только для **значений свойств** в `actions`/`events` объектах. **События** или **действия**, являющиеся **именами свойств** всегда принадлежат к текущему модулю или [пространству имён] socket.io. Поэтому Вы можете написать:
+You can point the way to the event or action from another namespace (for example `logger/logAnswer`), but it works only for **property values** in `actions`/`events` objects. **Actions** or **events**, that are **properties names** always belong to the current module or 
+ socket.io namespace. So you can write:
 
 ```
   event: 'otherModule/action'
 ```
 
-Но Вы не можете
+But you cannot
 
 ```
   'otherModule/event': 'myAction'
 ```
 
-Если `'='` установлено **значением** свойства то это означает, что имя **события** и **действия**, описываемых этой парой, одинаковы. 
+If `'='` is set by the **value** of property, it means that the name of **event** and **action**, described with this pair, are the same.
 
-## Пример полного vuex хранилища
+## Example of full vuex store
 
 ```javascript
 import socket from 'vuex-socket-sync';
@@ -135,15 +120,17 @@ export default new Vuex.Store({
 });
 ```
 
-Итак, что мы здесь имеем?
+So, what have we got here?
 
-На событие `paths` из пространства имен `/folders` будут диспетчеризованы два действия: `folders/fillQueryPaths` и `settings/saveActualPaths`.
+Two actions will be dispatched on event `paths` from the namespace `/folders`: `folders/fillQueryPaths` and `settings/saveActualPaths`.
 
-При диспетчеризации `folders/openUserfolder` будет отправлено событие `browse` пространства имён `/folders`.
+On dispatching `folders/openUserfolder` event `browse` will be emited from the namespace `/folders`.
 
-При диспетчеризации `folders/execute`  будет отправлено событие `execute` пространства имён `/interpreter`.
+On dispatching `folders/execute` event `execute` will be emited from the namespace `/interpreter`.
 
-При диспетчеризации `folders/search` будет отправлено событие `search` пространства имён `/folders`. 
+On dispatching `folders/search` event `search` will be emited from the namespace `/folders`. 
 
 Как Вы видите, вы просто передаёте в плагин конструктор socket.io подключения. Дальше он сам обо всём позаботится.
+
+As you can see, you just transmit socket.io connection constructor to plugin. Later it will care about everything itself.
 
